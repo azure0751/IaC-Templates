@@ -33,16 +33,10 @@ jobs:
         with:
           creds: ${{secrets.AZURE_CREDENTIALS}}
         
-      - name: Az CLI Create Resource Group
-        uses: Azure/CLI@v1
-        with:
-          inlineScript: |
-            az group create \
-            --name ${{env.resourceGroupName}} \
-            --location ${{env.resourceGroupLocation}}
+     
 
           
-      - name: Deploy Bicep file
+      - name: Creeate storage account
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{secrets.AZURE_SUBSCRIPTION}}
@@ -52,7 +46,7 @@ jobs:
           failOnStdErr: false
 
 
-      - name: Az CLI Create Resource Group
+      - name: deploy storage account
         uses: Azure/CLI@v1
         with:
           inlineScript: |
