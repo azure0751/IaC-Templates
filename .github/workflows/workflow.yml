@@ -58,6 +58,7 @@ jobs:
           inlineScript: |
             az deployment sub create \
             --location 'eastus' \
-            --template-file '.\template.bicep'
+            --template-file '.\template.bicep' \
+            --parameters 'location=eastus'
 
          
