@@ -10,7 +10,7 @@ param location 'eastus'
 var baseName = 'abc'
 
 // Module for loganalytics workspace and related resources
-module rgloganalyticsworkspace 'modules/resource-group/main.bicep' = {
+module rgloganalyticsworkspace 'modules/rgmain.bicep' = {
   name: 'rgloganalyticsworkspace'
   params: {
     baseName: baseName
