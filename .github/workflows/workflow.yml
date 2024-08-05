@@ -1,9 +1,31 @@
 name: Deploy Bicep file
 on: [push]
+
+env:
+  resourceGroupName: TemplateDeploymentRG
+  resourceGroupLocation: uksouth
+  bicepfilePath: ./storage.bicep
+
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+
+     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+            
+      # Builds the Bicep template
+      - name: bicep-build-output
+        uses: Azure/bicep-build-action@v1.0.1
+        with:
+            bicepFilePath: ${{  env.bicepfilePath }}
+            outputFilePath: ./main.json
+      
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          path: ./main.json
 
     - name: Checkout code
       uses: actions/checkout@main
@@ -12,7 +34,16 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Az CLI Create Resource Group
+      uses: Azure/CLI@v1
+      with:
+        inlineScript: |
+          az group create \
+          --name ${{ env.resourceGroupName }} \
+          --location ${{ env.resourceGroupLocation }}
 
+          
     - name: Deploy Bicep file
       uses: azure/arm-deploy@v1
       with:
