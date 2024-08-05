@@ -12,6 +12,6 @@ module staticAppDeployment './modules/static-web-app-module.bicep' = {
   name: 'static-web-app-deployment'
   scope: resourceGroup
   params: {
-    staticAppName: 'my-static-web-app'
+    staticAppName: 'vikasabc06july'
   }
 }
