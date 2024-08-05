@@ -57,7 +57,7 @@ jobs:
         with:
           inlineScript: |
             az deployment sub create \
-            --location ${{env.resourceGroupLocation}} \
+            --location 'eastus' \
             --template-file '.\template.bicep'
 
          
