@@ -12,7 +12,7 @@ param storagespecificPrefefix string
 param rgName string
 
 // Create Storage Account
-module st 'modules/mainstorage.bicep' = {
+module st 'mainstorage.bicep' = {
   name: 'storageaccount'
   scope: resourceGroup(rgName)
   params: {

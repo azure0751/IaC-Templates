@@ -8,4 +8,4 @@ resource newRG 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   location: resourceGroupLocation
 }
 
-output resourceGroupName string = newRG.name
+output resourceGroupName string = resourceGroupName

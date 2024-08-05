@@ -13,9 +13,9 @@ var baseName = 'abc'
 module rgloganalyticsworkspace 'modules/rgmain.bicep' = {
   name: 'rgloganalyticsworkspace'
   params: {
-    baseName: baseName
-    location: location
-    suffix: 'log'
+    resourceGroupLocation:'eastus'
+    resourceGroupName:'demorg'
+    
   }
 }
 
