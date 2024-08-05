@@ -50,3 +50,14 @@ jobs:
           template: ./storage.bicep
           parameters: 'storagePrefix=mystore storageSKU=Standard_LRS storagenane=shukla052024'
           failOnStdErr: false
+
+
+      - name: Az CLI Create Resource Group
+        uses: Azure/CLI@v1
+        with:
+          inlineScript: |
+            az deployment sub create \
+            --location ${{env.resourceGroupLocation}} \
+            --template-file '.\template.bicep'
+
+         
