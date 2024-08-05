@@ -6,12 +6,10 @@ env:
   resourceGroupLocation: uksouth
   bicepfilePath: ./storage.bicep
 
-  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-
      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
             
