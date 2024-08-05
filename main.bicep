@@ -2,7 +2,7 @@ targetScope = 'subscription'
 
 
 @description('Azure location name as returned by az account list-locations -o table')
-param location 'eastus'
+param location string ='eastus'
 
 
 // Variables
