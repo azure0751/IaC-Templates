@@ -1,5 +1,5 @@
 name: Deploy Bicep file
-on: [push]
+on: []
 
 env:
   resourceGroupName: TemplateDeploymentRG
