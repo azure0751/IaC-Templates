@@ -54,5 +54,14 @@ jobs:
             --location 'eastus' \
             --template-file '.\main.bicep' \
             
-
+      - name: Create a Resourcegroup for private endpoint demo
+        uses: Azure/CLI@v1
+        with:
+          inlineScript: |
+                az group create -l westus -n privateepdemo     
          
+      - name: Create a  private endpoint demo
+        uses: Azure/CLI@v1
+        with:
+          inlineScript: |
+                        az deployment group create --resource-group privateepdemo --template-file privateendpointdeploy.json
