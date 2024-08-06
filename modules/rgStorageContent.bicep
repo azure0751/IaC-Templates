@@ -23,8 +23,4 @@ module st 'mainstorage.bicep' = {
   }
 }
 
-// --- Outputs
 
-output storageaccount object = st
-output storageaccountName string = st.outputs.storageName
-output storageaccountId string = st.outputs.StorageAccountID
