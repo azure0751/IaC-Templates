@@ -1,0 +1,394 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualNetworks_securevnet_name": {
+            "defaultValue": "securevnet",
+            "type": "String"
+        },
+        "networkInterfaces_vm_service_endpoi375_name": {
+            "defaultValue": "vm-service-endpoi375",
+            "type": "String"
+        },
+        "storageAccounts_az305securestoragedemo_name": {
+            "defaultValue": "az305securestoragedemo",
+            "type": "String"
+        },
+        "virtualMachines_vm_service_endpoint_demo_name": {
+            "defaultValue": "vm-service-endpoint-demo",
+            "type": "String"
+        },
+        "publicIPAddresses_vm_service_endpoint_demo_ip_name": {
+            "defaultValue": "vm-service-endpoint-demo-ip",
+            "type": "String"
+        },
+        "networkSecurityGroups_vm_service_endpoint_demo_nsg_name": {
+            "defaultValue": "vm-service-endpoint-demo-nsg",
+            "type": "String"
+        },
+        "schedules_shutdown_computevm_vm_service_endpoint_demo_name": {
+            "defaultValue": "shutdown-computevm-vm-service-endpoint-demo",
+            "type": "String"
+        },
+        "Admin_Password_For_VM": {
+            "defaultValue": "123qwesrd",
+            "type": "Securestring"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkSecurityGroups_vm_service_endpoint_demo_nsg_name')]",
+            "location": "eastus",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 300,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('publicIPAddresses_vm_service_endpoint_demo_ip_name')]",
+            "location": "eastus",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "properties": {
+                "ipAddress": "40.76.202.126",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('virtualNetworks_securevnet_name')]",
+            "location": "eastus",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "vmsubnet",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "eastus",
+                                        "westus"
+                                    ]
+                                }
+                            ],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2022-03-01",
+            "name": "[parameters('virtualMachines_vm_service_endpoint_demo_name')]",
+            "location": "eastus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_service_endpoi375_name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v3"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-datacenter-smalldisk-g2",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_vm_service_endpoint_demo_name'), '_OsDisk_1_401fa2884ca6432fbba04394ce22ad9f')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        },
+                        "deleteOption": "Delete",
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "vm-service-endp",
+                    "adminUsername": "training",
+                    "adminPassword": "[parameters('Admin_Password_For_VM')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true,
+                        "patchSettings": {
+                            "patchMode": "AutomaticByOS",
+                            "assessmentMode": "ImageDefault",
+                            "enableHotpatching": false
+                        }
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_service_endpoi375_name'))]",
+                            "properties": {
+                                "deleteOption": "Detach"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "microsoft.devtestlab/schedules",
+            "apiVersion": "2018-09-15",
+            "name": "[parameters('schedules_shutdown_computevm_vm_service_endpoint_demo_name')]",
+            "location": "eastus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_vm_service_endpoint_demo_name'))]"
+            ],
+            "properties": {
+                "status": "Enabled",
+                "taskType": "ComputeVmShutdownTask",
+                "dailyRecurrence": {
+                    "time": "1900"
+                },
+                "timeZoneId": "UTC",
+                "notificationSettings": {
+                    "status": "Enabled",
+                    "timeInMinutes": 30,
+                    "emailRecipient": "abhi0751@gmail.com",
+                    "notificationLocale": "en"
+                },
+                "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_vm_service_endpoint_demo_name'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('networkSecurityGroups_vm_service_endpoint_demo_nsg_name'), '/RDP')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_service_endpoint_demo_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "3389",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 300,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_securevnet_name'), '/vmsubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_securevnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.0.0/24",
+                "serviceEndpoints": [
+                    {
+                        "service": "Microsoft.Storage",
+                        "locations": [
+                            "eastus",
+                            "westus"
+                        ]
+                    }
+                ],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-09-01",
+            "name": "[parameters('storageAccounts_az305securestoragedemo_name')]",
+            "location": "eastus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_securevnet_name'), 'vmsubnet')]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "dnsEndpointType": "Standard",
+                "defaultToOAuthAuthentication": false,
+                "publicNetworkAccess": "Enabled",
+                "allowCrossTenantReplication": true,
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": true,
+                "allowSharedKeyAccess": true,
+                "networkAcls": {
+                    "resourceAccessRules": [],
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_securevnet_name'), 'vmsubnet')]",
+                            "action": "Allow",
+                            "state": "Succeeded"
+                        }
+                    ],
+                    "ipRules": [],
+                    "defaultAction": "Deny"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "requireInfrastructureEncryption": false,
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2021-09-01",
+            "name": "[concat(parameters('storageAccounts_az305securestoragedemo_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_az305securestoragedemo_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "changeFeed": {
+                    "enabled": false
+                },
+                "restorePolicy": {
+                    "enabled": false
+                },
+                "containerDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 7
+                },
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "allowPermanentDelete": false,
+                    "enabled": true,
+                    "days": 7
+                },
+                "isVersioningEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2021-09-01",
+            "name": "[concat(parameters('storageAccounts_az305securestoragedemo_name'), '/default/abcpublic')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_az305securestoragedemo_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_az305securestoragedemo_name'))]"
+            ],
+            "properties": {
+                "immutableStorageWithVersioning": {
+                    "enabled": false
+                },
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "Blob"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkInterfaces_vm_service_endpoi375_name')]",
+            "location": "eastus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vm_service_endpoint_demo_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_securevnet_name'), 'vmsubnet')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_service_endpoint_demo_nsg_name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.0.0.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vm_service_endpoint_demo_ip_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_securevnet_name'), 'vmsubnet')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_vm_service_endpoint_demo_nsg_name'))]"
+                }
+            }
+        }
+    ]
+}
