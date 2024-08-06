@@ -31,7 +31,7 @@
             "type": "String"
         },
         "Admin_Password_For_VM": {
-            "defaultValue": "123qwesrd",
+            "defaultValue": "vikas@123qwesrd",
             "type": "Securestring"
         }
     },
