@@ -40,7 +40,7 @@ jobs:
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{secrets.AZURE_SUBSCRIPTION}}
-          resourceGroupName: ${{secrets.AZURE_RG}}
+          resourceGroupName: mosesrg
           template: ./storage.bicep
           parameters: 'storagePrefix=mystore storageSKU=Standard_LRS storagenane=shukla052024'
           failOnStdErr: false
