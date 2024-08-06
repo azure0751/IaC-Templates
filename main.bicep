@@ -29,4 +29,21 @@ module rgStorageContent 'modules/rgStorageContent.bicep' = {
     storagespecificPrefefix:'st'
    
   }
+
+
 }
+
+module appservice 'modules/appservicecontent.bicep' = {
+  name: 'appservicecontent'
+  params: {
+    
+    location: location
+    rgName: rgloganalyticsworkspace.outputs.resourceGroupName
+    
+   
+  }
+
+
+}
+
+
